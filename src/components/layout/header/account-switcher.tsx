@@ -27,8 +27,15 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                 setIsOpen(false);
             }
         };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false);
+        };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
     const toggleDropdown = useCallback(() => {
@@ -51,7 +58,7 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
             .map(account => ({
                 loginid: account.loginid,
                 currency: account.currency,
-                balance: addComma(parseFloat(String(account.balance ?? 0)).toFixed(getDecimalPlaces(account.currency))),
+                balance: addComma(Number(account.balance ?? 0).toFixed(getDecimalPlaces(account.currency))),
                 isVirtual: isDemoAccount(account.loginid),
                 isActive: account.loginid === activeLoginid,
             }))
@@ -69,14 +76,23 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                 <div
                     data-testid='dt_acc_info'
                     id='dt_core_account-info_acc-info'
+                    role={showChevron ? 'button' : undefined}
+                    tabIndex={showChevron ? 0 : -1}
+                    aria-expanded={showChevron ? isOpen : undefined}
+                    aria-haspopup={showChevron ? 'listbox' : undefined}
                     className={classNames('acc-info', {
                         'acc-info--is-virtual': isVirtual,
                         'acc-info--interactive': showChevron,
-                        'acc-info--show': isOpen,
                     })}
                     onClick={toggleDropdown}
+                    onKeyDown={e => {
+                        if (showChevron && (e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            toggleDropdown();
+                        }
+                    }}
                 >
-                    <span className='acc-info__id'></span>
+                    <span className='acc-info__id' aria-hidden='true'></span>
                     <div className='acc-info__content'>
                         <div className='acc-info__account-type-header'>
                             <Text as='p' size='xxxs' className='acc-info__account-type'>
@@ -124,15 +140,24 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                 </div>
             </AccountInfoWrapper>
             {isOpen && (
-                <div className='acc-dropdown'>
+                <div className='acc-dropdown' role='listbox'>
                     {formattedAccounts.map(account => (
                         <div
                             key={account.loginid}
+                            role='option'
+                            aria-selected={account.isActive}
+                            tabIndex={0}
                             className={classNames('acc-dropdown__account', {
                                 'acc-dropdown__account--selected': account.isActive,
                                 'acc-dropdown__account--virtual': account.isVirtual,
                             })}
                             onClick={() => !account.isActive && handleAccountSelect(account.loginid)}
+                            onKeyDown={e => {
+                                if (!account.isActive && (e.key === 'Enter' || e.key === ' ')) {
+                                    e.preventDefault();
+                                    handleAccountSelect(account.loginid);
+                                }
+                            }}
                         >
                             <Text
                                 size='xxxs'
@@ -147,7 +172,11 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                                 )}
                             </Text>
                             <Text size='xs' weight='bold' className='acc-dropdown__balance'>
-                                {`${account.balance} ${getCurrencyDisplayCode(account.currency)}`}
+                                {account.currency ? (
+                                    `${account.balance} ${getCurrencyDisplayCode(account.currency)}`
+                                ) : (
+                                    <Localize i18n_default_text='No currency assigned' />
+                                )}
                             </Text>
                         </div>
                     ))}

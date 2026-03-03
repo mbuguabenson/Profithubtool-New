@@ -2,6 +2,7 @@
 import { getAccountId, getAccountType, isDemoAccount, removeUrlParameter } from '@/utils/account-helpers';
 /* [/AI] */
 import CommonStore from '@/stores/common-store';
+import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
 import { TAuthData } from '@/types/api-types';
 import { clearAuthData } from '@/utils/auth-utils';
 import { handleBackendError, isBackendError } from '@/utils/error-handler';
@@ -289,7 +290,23 @@ class APIBase {
                       loginid: balance.loginid,
                   }
                 : null;
-            const accountList = currentAccount ? [currentAccount] : [];
+
+            // Build full account list from sessionStorage (populated during OAuth flow)
+            // Falls back to just the current account if sessionStorage has no data
+            const storedAccounts = DerivWSAccountsService.getStoredAccounts();
+            const accountList =
+                storedAccounts && storedAccounts.length > 0
+                    ? storedAccounts
+                          .filter(a => !a.status || a.status === 'active')
+                          .map(a => ({
+                              balance: parseFloat(a.balance) || 0,
+                              currency: a.currency || 'USD',
+                              is_virtual: a.account_type === 'demo' ? 1 : 0,
+                              loginid: a.account_id,
+                          }))
+                    : currentAccount
+                      ? [currentAccount]
+                      : [];
 
             setAccountList(accountList); // Observable stream
             setAuthData({

@@ -253,16 +253,6 @@
         }
     }
 
-    &--show {
-        .acc-info__select-arrow {
-            transform: rotate(180deg);
-        }
-
-        .acc-info__select-arrow--invert {
-            transform: rotate(0deg);
-        }
-    }
-
     &__button {
         margin: 0 1.6em 0 0 !important;
 
