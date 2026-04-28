@@ -44,7 +44,8 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
     const { hubEnabledCountryList } = useFirebaseCountriesConfig();
     const { onRenderTMBCheck, isTmbEnabled } = useTMB();
     const is_tmb_enabled = isTmbEnabled() || window.is_tmb_enabled === true;
-    // No need for additional state management here since we're handling it in the layout component
+    
+    const [showConnectOptions, setShowConnectOptions] = React.useState(false);
 
     const renderAccountSection = useCallback(() => {
         // Show loader during authentication processes
@@ -102,7 +103,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
                             const is_hub_enabled_country = hubEnabledCountryList.includes(client?.residence || '');
 
                             if (has_wallet && is_hub_enabled_country) {
-                                redirect_url = new URL(standalone_routes.account_settings);
+                                urlParams = new URL(standalone_routes.account_settings);
                             }
                             // Check if the account is a demo account
                             // Use the URL parameter to determine if it's a demo account, as this will update when the account changes
@@ -133,43 +134,73 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
             );
         } else {
             return (
-                <div className='auth-actions' style={{ display: 'flex', gap: '8px' }}>
-                    <Button
-                        tertiary
-                        onClick={async () => {
-                            localStorage.setItem('API_MODE', 'legacy');
-                            clearAuthData(false);
-                            try {
-                                window.location.assign(await generateOAuthURL('legacy'));
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        }}
-                    >
-                        <Localize i18n_default_text='Login (Legacy)' />
-                    </Button>
-                    <Button
-                        primary
-                        onClick={async () => {
-                            localStorage.setItem('API_MODE', 'new');
-                            clearAuthData(false);
-                            try {
-                                window.location.assign(await generateOAuthURL('new'));
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        }}
-                    >
-                        <Localize i18n_default_text='Login (New)' />
-                    </Button>
-                    <Button
-                        secondary
-                        onClick={() => {
-                            window.open(standalone_routes.signup);
-                        }}
-                    >
-                        <Localize i18n_default_text='Sign up' />
-                    </Button>
+                <div className='auth-actions' style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {!showConnectOptions ? (
+                        <Button
+                            primary
+                            onClick={() => setShowConnectOptions(true)}
+                        >
+                            <Localize i18n_default_text='Connect' />
+                        </Button>
+                    ) : (
+                        <>
+                            <Button
+                                tertiary
+                                onClick={async () => {
+                                    localStorage.setItem('API_MODE', 'legacy');
+                                    clearAuthData(false);
+                                    try {
+                                        window.location.assign(await generateOAuthURL('legacy'));
+                                    } catch (error) {
+                                        console.error(error);
+                                    }
+                                }}
+                            >
+                                <Localize i18n_default_text='Old Account' />
+                            </Button>
+                            <Button
+                                primary
+                                onClick={async () => {
+                                    localStorage.setItem('API_MODE', 'new');
+                                    clearAuthData(false);
+                                    try {
+                                        window.location.assign(await generateOAuthURL('new'));
+                                    } catch (error) {
+                                        console.error(error);
+                                    }
+                                }}
+                            >
+                                <Localize i18n_default_text='New Account' />
+                            </Button>
+                            <Button
+                                tertiary
+                                onClick={() => setShowConnectOptions(false)}
+                                style={{ padding: '0 8px' }}
+                            >
+                                ✕
+                            </Button>
+                        </>
+                    )}
+                    {!isDesktop && !showConnectOptions && (
+                        <Button
+                            secondary
+                            onClick={() => {
+                                window.open(standalone_routes.signup);
+                            }}
+                        >
+                            <Localize i18n_default_text='Sign up' />
+                        </Button>
+                    )}
+                    {isDesktop && !showConnectOptions && (
+                        <Button
+                            secondary
+                            onClick={() => {
+                                window.open(standalone_routes.signup);
+                            }}
+                        >
+                            <Localize i18n_default_text='Sign up' />
+                        </Button>
+                    )}
                 </div>
             );
         }
@@ -189,6 +220,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         is_tmb_enabled,
         hubEnabledCountryList,
         isTmbEnabled,
+        showConnectOptions,
     ]);
 
     if (client?.should_hide_header) return null;
