@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
-import { API_MODE, DERIV_NEW_TOKEN_URL, getAppId } from '@/components/shared/utils/config/config';
+import { API_MODE, DERIV_NEW_TOKEN_URL, getAppId, DERIV_OAUTH_CLIENT_ID } from '@/components/shared/utils/config/config';
 import { popPKCEVerifier, validatePKCEState } from '@/utils/pkce';
 
 import { clearAuthData } from '@/utils/auth-utils';
@@ -53,7 +53,7 @@ const CallbackPage = observer(() => {
                         body: new URLSearchParams({
                             grant_type: 'authorization_code',
                             code,
-                            client_id: String(getAppId()),
+                            client_id: DERIV_OAUTH_CLIENT_ID,
                             redirect_uri: `${window.location.origin}/callback`,
                             code_verifier: verifier,
                         }),

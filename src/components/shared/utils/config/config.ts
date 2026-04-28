@@ -3,6 +3,7 @@ import { generatePKCE, generateState, storePKCEState } from '@/utils/pkce';
 
 export const DERIV_NEW_AUTH_URL = 'https://auth.deriv.com/oauth2/auth';
 export const DERIV_NEW_TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
+export const DERIV_OAUTH_CLIENT_ID = '337mlfKzdHLWLG1l4AdsT';
 
 // Feature Flag for Migration: 'legacy' | 'new'
 export const API_MODE: 'legacy' | 'new' = (window.localStorage.getItem('API_MODE') as 'legacy' | 'new') || 'new';
@@ -188,7 +189,7 @@ export const generateOAuthURL = async () => {
 
     // 3. Build the new Authorization Code + PKCE URL
     const params = new URLSearchParams({
-        app_id: String(app_id),
+        client_id: DERIV_OAUTH_CLIENT_ID,
         l: lang,
         brand: 'deriv',
         redirect_uri,
