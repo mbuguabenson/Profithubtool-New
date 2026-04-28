@@ -174,7 +174,7 @@ class APIBase {
         if (!accountId && localStorage.getItem('new_api_accounts_list')) {
             const accounts = JSON.parse(localStorage.getItem('new_api_accounts_list') || '[]');
             if (accounts.length > 0) {
-                accountId = accounts[0].account_id;
+                accountId = accounts[0].account_id || '';
                 localStorage.setItem('new_api_account_id', accountId);
             }
         }
@@ -182,7 +182,7 @@ class APIBase {
         if (accessToken && accountId) {
             setIsAuthorizing(true);
             try {
-                const otpUrl = await this.fetchOTPForAccount(accountId, accessToken);
+                const otpUrl = await this.fetchOTPForAccount(accountId as string, accessToken);
                 if (!otpUrl) throw new Error('Failed to obtain OTP URL');
                 
                 const trading_socket = new WebSocket(otpUrl);
