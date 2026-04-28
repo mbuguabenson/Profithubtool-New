@@ -357,7 +357,7 @@ class APIBase {
             if (!this._legacyApi) return;
             const authPromise = this._legacyApi.authorize(this.token);
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Auth Timeout')), 15000)
+                setTimeout(() => reject(new Error('Auth Timeout')), 30000)
             );
 
             const { authorize, error } = (await Promise.race([authPromise, timeoutPromise])) as {
@@ -378,7 +378,9 @@ class APIBase {
                 } else {
                     console.error('[API] Authorization error (generic):', error);
                 }
-                setIsAuthorizing(false);
+                runInAction(() => {
+                    setIsAuthorizing(false);
+                });
                 return error;
             }
             this.account_info = authorize;
@@ -412,17 +414,21 @@ class APIBase {
             // this.getSelfExclusion(); commented this so we dont call it from two places
         } catch (e: any) {
             console.error('[API] Authorization Exception:', e);
-            this.is_authorized = false;
-            // Only clear auth data if it's a real failure, not just a timeout during initialization
-            // but for now, we follow the existing logic of clearing if fails.
-            if (e?.message !== 'Auth Timeout') {
-                clearAuthData();
-            }
-            setIsAuthorized(false);
+            runInAction(() => {
+                this.is_authorized = false;
+                // Only clear auth data if it's a real failure, not just a timeout during initialization
+                if (e?.message !== 'Auth Timeout') {
+                    clearAuthData();
+                }
+                setIsAuthorized(false);
+                setIsAuthorizing(false);
+            });
             globalObserver.emit('Error', e);
         } finally {
-            setIsAuthorizing(false);
-            this.toggleRunButton(false);
+            runInAction(() => {
+                setIsAuthorizing(false);
+                this.toggleRunButton(false);
+            });
         }
     }
 
