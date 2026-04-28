@@ -135,6 +135,19 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         } else {
             return (
                 <div className='auth-actions' style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div 
+                        style={{ 
+                            fontSize: '10px', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px', 
+                            background: API_MODE === 'new' ? '#4bb4b3' : '#ff444f',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            textTransform: 'uppercase'
+                        }}
+                    >
+                        {API_MODE === 'new' ? 'Modern' : 'Legacy'}
+                    </div>
                     {!showConnectOptions ? (
                         <Button
                             primary

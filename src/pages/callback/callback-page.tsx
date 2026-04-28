@@ -11,6 +11,15 @@ import { observer } from 'mobx-react-lite';
 const CallbackPage = observer(() => {
     const { common } = useStore();
     const isProcessing = useRef(false);
+    
+    // Detect mode from URL path for strict isolation
+    const path = window.location.pathname;
+    const detectedMode = path.includes('/legacy/') ? 'legacy' : 'new';
+    
+    // Ensure API_MODE is synced with the callback we just entered
+    if (localStorage.getItem('API_MODE') !== detectedMode) {
+        localStorage.setItem('API_MODE', detectedMode);
+    }
 
     useEffect(() => {
         const processUrlTokens = async () => {
@@ -25,7 +34,9 @@ const CallbackPage = observer(() => {
 
             const params = new URLSearchParams(window.location.search);
 
-            if (API_MODE === 'new') {
+            const detectedMode = window.location.pathname.includes('/legacy') ? 'legacy' : 'new';
+
+            if (detectedMode === 'new') {
                 const code = params.get('code');
                 const state = params.get('state');
 
@@ -46,7 +57,7 @@ const CallbackPage = observer(() => {
                 }
 
                 try {
-                    const redirect_uri = `${window.location.origin}/callback`;
+                    const redirect_uri = `${window.location.origin}/auth/callback`;
                     console.log('[OAuth2] Exchange Config:', {
                         client_id: DERIV_OAUTH_CLIENT_ID,
                         redirect_uri,
