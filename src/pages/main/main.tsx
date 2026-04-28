@@ -250,7 +250,7 @@ const AppWrapper = observer(() => {
             if (tmbEnabled) {
                 await onRenderTMBCheck();
             } else {
-                window.location.assign(generateOAuthURL());
+                window.location.assign(await generateOAuthURL());
             }
         } catch (error) {
             console.error('Login generation error:', error);

@@ -173,7 +173,7 @@ const Layout = observer(() => {
                 if (tmbEnabled) {
                     await onRenderTMBCheck();
                 } else if (shouldAuthenticate) {
-                    window.location.assign(generateOAuthURL());
+                    window.location.assign(await generateOAuthURL());
                 }
             } catch (err) {
                 // eslint-disable-next-line no-console

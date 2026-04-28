@@ -72,7 +72,7 @@ export const useOauth2 = ({
     };
     const retriggerOAuth2Login = async () => {
         const { generateOAuthURL } = await import('@/components/shared');
-        window.location.assign(generateOAuthURL());
+        window.location.assign(await generateOAuthURL());
     };
 
     return { oAuthLogout: logoutHandler, retriggerOAuth2Login, isSingleLoggingIn };
