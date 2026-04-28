@@ -167,7 +167,7 @@ export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
     }
 
     const lang = window.localStorage.getItem('lang') || 'EN';
-    const redirect_uri = `${window.location.origin}/callback`;
+    const redirect_uri = 'https://profithubtool.vercel.app/callback';
 
     // 1. Generate PKCE values
     const { code_verifier, code_challenge } = await generatePKCE();
