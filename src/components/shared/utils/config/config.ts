@@ -181,15 +181,27 @@ export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
         console.log('[Config] Reusing existing PKCE state');
         code_verifier = existingPKCE.code_verifier;
         state = existingState;
-        // Regenerate challenge from existing verifier
         const challenge_buffer = await sha256(code_verifier);
         code_challenge = base64urlencode(challenge_buffer);
     } else {
         const pkce = await generatePKCE();
-        code_verifier = pkce.code_verifier;
-        code_challenge = pkce.code_challenge;
-        state = generateState();
-        storePKCEState(code_verifier, state);
+        
+        // Re-check after async generation to prevent race condition
+        const doubleCheckState = getStoredState();
+        const doubleCheckPKCE = getStoredPKCE();
+        
+        if (doubleCheckState && doubleCheckPKCE?.code_verifier) {
+            console.log('[Config] Race condition detected: Reusing state from parallel call');
+            code_verifier = doubleCheckPKCE.code_verifier;
+            state = doubleCheckState;
+            const challenge_buffer = await sha256(code_verifier);
+            code_challenge = base64urlencode(challenge_buffer);
+        } else {
+            code_verifier = pkce.code_verifier;
+            code_challenge = pkce.code_challenge;
+            state = generateState();
+            storePKCEState(code_verifier, state);
+        }
     }
 
     // 3. Build the new Authorization Code + PKCE URL
