@@ -5,8 +5,8 @@ export const DERIV_NEW_AUTH_URL = 'https://auth.deriv.com/oauth2/auth';
 export const DERIV_NEW_TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
 export const DERIV_OAUTH_CLIENT_ID = '337mlfKzdHLWLG1l4AdsT';
 
-// Feature Flag for Migration: 'legacy' | 'new'
-export const API_MODE: 'legacy' | 'new' = (window.localStorage.getItem('API_MODE') as 'legacy' | 'new') || 'new';
+// Feature Flag for Migration: Fixed to 'legacy' only
+export const API_MODE: 'legacy' | 'new' = 'legacy';
 
 export const APP_IDS = {
     LOCALHOST: 36300,

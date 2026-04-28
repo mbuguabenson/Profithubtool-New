@@ -43,7 +43,7 @@ class DBotStore extends DBotStoreInterface {
     }
 
     static get instance() {
-        return this.singleton;
+        return this.singleton || {};
     }
 }
 

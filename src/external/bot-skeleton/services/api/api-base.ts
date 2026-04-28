@@ -266,7 +266,8 @@ class APIBase {
                 subscribe: (callback: (msg: any) => void) => {
                     const listener = (event: MessageEvent) => {
                         try {
-                            callback(JSON.parse(event.data));
+                            const parsed = JSON.parse(event.data);
+                            callback({ data: parsed });
                         } catch (e) {
                             console.error('[API] Failed to parse message:', e);
                         }
