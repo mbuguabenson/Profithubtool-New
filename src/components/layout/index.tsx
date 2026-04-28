@@ -49,11 +49,16 @@ const Layout = observer(() => {
     const getQueryParams = new URLSearchParams(window.location.search);
     const currency = getQueryParams.get('account') ?? '';
     const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
-    const isClientAccountsPopulated = Object.keys(accountsList).length > 0;
-    const ifClientAccountHasCurrency =
-        Object.values(checkClientAccount).some(account => account.currency === currency) ||
-        currency === 'demo' ||
-        currency === '';
+    const newAccountsList = JSON.parse(localStorage.getItem('new_api_accounts_list') ?? '[]');
+    const isNewMode = API_MODE === 'new';
+    const isClientAccountsPopulated = isNewMode 
+        ? newAccountsList.length > 0 
+        : Object.keys(accountsList).length > 0;
+    const ifClientAccountHasCurrency = isNewMode
+        ? newAccountsList.some((acc: any) => acc.currency === currency || currency === 'demo' || currency === '')
+        : Object.values(checkClientAccount).some(account => account.currency === currency) ||
+          currency === 'demo' ||
+          currency === '';
     const [clientHasCurrency, setClientHasCurrency] = useState(ifClientAccountHasCurrency);
     const [isAuthenticating, setIsAuthenticating] = useState(true); // Start with true to prevent flashing
 
@@ -78,6 +83,12 @@ const Layout = observer(() => {
                 const account_list = (data?.authorize?.account_list as IClientAccount[]) || [];
                 const account_list_filter = account_list.filter(acc => acc.is_disabled === 0);
                 api_accounts.current.push(account_list_filter || []);
+                
+                if (isNewMode) {
+                    setClientHasCurrency(true);
+                    return;
+                }
+
                 const allCurrencies = new Set(Object.values(checkClientAccount).map(acc => acc.currency));
 
                 // Skip disabled accounts when checking for missing currency
