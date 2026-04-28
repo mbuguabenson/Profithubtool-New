@@ -33,8 +33,8 @@ const CallbackPage = observer(() => {
             }
 
             const params = new URLSearchParams(window.location.search);
-
-            const detectedMode = window.location.pathname.includes('/legacy') ? 'legacy' : 'new';
+            const hasCode = params.has('code');
+            const detectedMode = hasCode ? 'new' : 'legacy';
 
             if (detectedMode === 'new') {
                 const code = params.get('code');
@@ -57,7 +57,7 @@ const CallbackPage = observer(() => {
                 }
 
                 try {
-                    const redirect_uri = `${window.location.origin}/auth/callback`;
+                    const redirect_uri = `${window.location.origin}/callback`;
                     console.log('[OAuth2] Exchange Config:', {
                         client_id: DERIV_OAUTH_CLIENT_ID,
                         redirect_uri,

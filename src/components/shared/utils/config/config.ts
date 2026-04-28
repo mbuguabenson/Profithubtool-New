@@ -167,7 +167,7 @@ export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
     }
 
     const lang = window.localStorage.getItem('lang') || 'EN';
-    const redirect_uri = activeMode === 'new' ? `${window.location.origin}/auth/callback` : `${window.location.origin}/legacy/callback`;
+    const redirect_uri = `${window.location.origin}/callback`;
 
     // 1. Generate PKCE values
     const { code_verifier, code_challenge } = await generatePKCE();
