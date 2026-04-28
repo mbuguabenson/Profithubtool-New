@@ -168,14 +168,24 @@ class APIBase {
 
         // 2. Initialize Trading WS (If logged in)
         const accessToken = localStorage.getItem('new_api_access_token');
-        const accountId = localStorage.getItem('new_api_account_id');
+        let accountId = localStorage.getItem('new_api_account_id');
+
+        // Fallback for account ID
+        if (!accountId && localStorage.getItem('new_api_accounts_list')) {
+            const accounts = JSON.parse(localStorage.getItem('new_api_accounts_list') || '[]');
+            if (accounts.length > 0) {
+                accountId = accounts[0].account_id;
+                localStorage.setItem('new_api_account_id', accountId);
+            }
+        }
 
         if (accessToken && accountId) {
             setIsAuthorizing(true);
             try {
                 const otpUrl = await this.fetchOTPForAccount(accountId, accessToken);
+                if (!otpUrl) throw new Error('Failed to obtain OTP URL');
+                
                 const trading_socket = new WebSocket(otpUrl);
-
                 this.tradingApi = this.wrapSocket(trading_socket);
 
                 this.tradingApi?.connection.addEventListener('open', () => {
@@ -414,10 +424,26 @@ class APIBase {
     }
 
     getActiveSymbols = async () => {
-        const activeApi = API_MODE === 'new' ? this.publicApi : this.api;
+        const isNew = API_MODE === 'new';
+        let activeApi = isNew ? this.publicApi : this.api;
         
-        await doUntilDone(() => activeApi?.send({ active_symbols: 'brief' }), [], this).then(
-            ({ active_symbols = [], error = {} }) => {
+        // Robust wait for API initialization
+        if (isNew && !activeApi) {
+            for (let i = 0; i < 50; i++) {
+                await new Promise(r => setTimeout(r, 100));
+                activeApi = this.publicApi;
+                if (activeApi) break;
+            }
+        }
+
+        if (!activeApi) {
+            console.error('[API] Cannot fetch active symbols: API not initialized');
+            return [];
+        }
+        
+        return await doUntilDone(() => activeApi.send({ active_symbols: 'brief' }), [], this).then(
+            (response: any) => {
+                const { active_symbols = [], error = {} } = response || {};
                 const pip_sizes = {};
                 if (active_symbols.length) this.has_active_symbols = true;
                 active_symbols.forEach(({ symbol, pip }: { symbol: string; pip: string }) => {
@@ -470,11 +496,15 @@ class APIBase {
     async measureLatency() {
         if (API_MODE === 'new') {
             const start = Date.now();
-            if (this.publicApi?.connection.readyState === 1) {
-                await this.publicApi.send({ ping: 1 }).catch(() => {});
-            }
-            if (this.tradingApi?.connection.readyState === 1) {
-                await this.tradingApi.send({ ping: 1 }).catch(() => {});
+            try {
+                if (this.publicApi?.connection?.readyState === 1) {
+                    await this.publicApi.send({ ping: 1 });
+                }
+                if (this.tradingApi?.connection?.readyState === 1) {
+                    await this.tradingApi.send({ ping: 1 });
+                }
+            } catch (e) {
+                // Ignore ping errors
             }
             const latency = Date.now() - start;
             if (this.common_store) this.common_store.setLatency(latency);
