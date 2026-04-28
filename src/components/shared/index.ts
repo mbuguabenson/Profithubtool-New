@@ -1,12 +1,10 @@
 export * from './services';
-export * from './services';
 export * from './components';
 
 export * from './utils/array';
 export * from './utils/brand';
 export * from './utils/browser';
 export * from './utils/config';
-export * from './utils/constants';
 export * from './utils/constants';
 export * from './utils/contract';
 export * from './utils/currency';
@@ -15,10 +13,8 @@ export * from './utils/digital-options';
 export * from './utils/dom';
 export * from './utils/files';
 export * from './utils/helpers';
-export * from './utils/helpers';
 export * from './utils/hooks';
 export * from './utils/loader';
-export * from './utils/loader-handler';
 export * from './utils/loader-handler';
 export * from './utils/location';
 export * from './utils/login';

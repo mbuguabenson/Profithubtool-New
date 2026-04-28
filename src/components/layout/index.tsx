@@ -11,9 +11,8 @@ import useTMB from '@/hooks/useTMB';
 import { 
     crypto_currencies_display_order, 
     fiat_currencies_display_order, 
-    generateOAuthURL,
-    API_MODE 
 } from '../shared';
+import { generateOAuthURL, API_MODE } from '../shared/utils/config/config';
 import { useDevice } from '@deriv-com/ui';
 import Footer from './footer';
 import AppHeader from './header';
