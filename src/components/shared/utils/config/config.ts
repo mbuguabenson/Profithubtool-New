@@ -165,8 +165,8 @@ const legacyGenerateOAuthURL = () => {
     }
 
     const app_id = getAppId();
-    const login_url = `${oauth_url}?app_id=${app_id}&l=${lang}&brand=deriv&redirect_uri=${redirect_uri}`;
-
+    const login_url = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&brand=deriv&redirect=home&state=`;
+ 
     console.log('[Config] Generated Legacy OAuth URL:', login_url);
     return login_url;
 };
