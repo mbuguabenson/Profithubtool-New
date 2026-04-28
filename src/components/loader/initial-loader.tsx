@@ -59,7 +59,7 @@ export default function InitialLoader() {
 
                 <div className='loader-content'>
                     <div className='status-container'>
-                        <AnimatePresence mode='wait'>
+                        <AnimatePresence exitBeforeEnter>
                             <motion.div
                                 key={messageIndex}
                                 initial={{ opacity: 0, y: 10 }}
