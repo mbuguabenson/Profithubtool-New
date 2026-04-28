@@ -1,3 +1,4 @@
+import { runInAction } from 'mobx';
 import Cookies from 'js-cookie';
 import CommonStore from '@/stores/common-store';
 import { TAuthData } from '@/types/api-types';

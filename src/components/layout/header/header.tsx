@@ -136,65 +136,19 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         } else {
             return (
                 <div className='auth-actions' style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <div 
-                        style={{ 
-                            fontSize: '10px', 
-                            padding: '2px 6px', 
-                            borderRadius: '4px', 
-                            background: API_MODE === 'new' ? '#4bb4b3' : '#ff444f',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase'
+                    <Button
+                        primary
+                        onClick={async () => {
+                            clearAuthData(false);
+                            try {
+                                window.location.assign(await generateOAuthURL('legacy'));
+                            } catch (error) {
+                                console.error(error);
+                            }
                         }}
                     >
-                        {API_MODE === 'new' ? 'Modern' : 'Legacy'}
-                    </div>
-                    {!showConnectOptions ? (
-                        <Button
-                            primary
-                            onClick={() => setShowConnectOptions(true)}
-                        >
-                            <Localize i18n_default_text='Connect' />
-                        </Button>
-                    ) : (
-                        <>
-                            <Button
-                                tertiary
-                                onClick={async () => {
-                                    localStorage.setItem('API_MODE', 'legacy');
-                                    clearAuthData(false);
-                                    try {
-                                        window.location.assign(await generateOAuthURL('legacy'));
-                                    } catch (error) {
-                                        console.error(error);
-                                    }
-                                }}
-                            >
-                                <Localize i18n_default_text='Old Account' />
-                            </Button>
-                            <Button
-                                primary
-                                onClick={async () => {
-                                    localStorage.setItem('API_MODE', 'new');
-                                    clearAuthData(false);
-                                    try {
-                                        window.location.assign(await generateOAuthURL('new'));
-                                    } catch (error) {
-                                        console.error(error);
-                                    }
-                                }}
-                            >
-                                <Localize i18n_default_text='New Account' />
-                            </Button>
-                            <Button
-                                tertiary
-                                onClick={() => setShowConnectOptions(false)}
-                                style={{ padding: '0 8px' }}
-                            >
-                                ✕
-                            </Button>
-                        </>
-                    )}
+                        <Localize i18n_default_text='Connect' />
+                    </Button>
                     {!isDesktop && !showConnectOptions && (
                         <Button
                             secondary

@@ -3,9 +3,6 @@ import { generatePKCE, generateState, storePKCEState, getStoredPKCE, getStoredSt
 
 export const DERIV_NEW_AUTH_URL = 'https://auth.deriv.com/oauth2/auth';
 export const DERIV_NEW_TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
-export const DERIV_OAUTH_CLIENT_ID = '337mlfKzdHLWLG1l4AdsT';
-
-// Feature Flag for Migration: Fixed to 'legacy' only
 export const API_MODE: 'legacy' | 'new' = 'legacy';
 
 export const APP_IDS = {
@@ -161,65 +158,6 @@ const legacyGenerateOAuthURL = () => {
 };
 
 export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
-    const activeMode = mode || API_MODE;
-    
-    if (activeMode === 'legacy') {
-        return legacyGenerateOAuthURL();
-    }
-
-    const lang = window.localStorage.getItem('lang') || 'EN';
-    const redirect_uri = 'https://profithubtool.vercel.app/callback';
-
-    // 1. Check for existing PKCE values to prevent state-overwriting during re-renders
-    let code_verifier: string;
-    let code_challenge: string;
-    let state: string;
-
-    const existingPKCE = getStoredPKCE();
-    const existingState = getStoredState();
-
-    if (existingPKCE?.code_verifier && existingState) {
-        console.log('[Config] Reusing existing PKCE state');
-        code_verifier = existingPKCE.code_verifier;
-        state = existingState;
-        const challenge_buffer = await sha256(code_verifier);
-        code_challenge = base64urlencode(challenge_buffer);
-    } else {
-        const pkce = await generatePKCE();
-        
-        // Re-check after async generation to prevent race condition
-        const doubleCheckState = getStoredState();
-        const doubleCheckPKCE = getStoredPKCE();
-        
-        if (doubleCheckState && doubleCheckPKCE?.code_verifier) {
-            console.log('[Config] Race condition detected: Reusing state from parallel call');
-            code_verifier = doubleCheckPKCE.code_verifier;
-            state = doubleCheckState;
-            const challenge_buffer = await sha256(code_verifier);
-            code_challenge = base64urlencode(challenge_buffer);
-        } else {
-            code_verifier = pkce.code_verifier;
-            code_challenge = pkce.code_challenge;
-            state = generateState();
-            storePKCEState(code_verifier, state);
-        }
-    }
-
-    // 3. Build the new Authorization Code + PKCE URL
-    const params = new URLSearchParams({
-        client_id: DERIV_OAUTH_CLIENT_ID,
-        l: lang,
-        brand: 'deriv',
-        redirect_uri,
-        response_type: 'code',
-        scope: 'trade',
-        code_challenge,
-        code_challenge_method: 'S256',
-        state,
-    });
-
-    const login_url = `${DERIV_NEW_AUTH_URL}?${params.toString()}`;
-
-    console.log('[Config] Generated New PKCE OAuth URL:', login_url);
-    return login_url;
+    // Force legacy regardless of requested mode
+    return legacyGenerateOAuthURL();
 };
