@@ -21,10 +21,8 @@ import { Analytics } from '@deriv-com/analytics';
  * @returns {{ oAuthLogout: () => Promise<void>; retriggerOAuth2Login: () => Promise<void>; isSingleLoggingIn: boolean }}
  */
 export const useOauth2 = ({
-    handleLogout,
     client,
 }: {
-    handleLogout?: () => Promise<void>;
     client?: RootStore['client'];
 } = {}) => {
     const [isSingleLoggingIn, setIsSingleLoggingIn] = useState(false);
