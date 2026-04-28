@@ -455,22 +455,30 @@ class APIBase {
 
     startPingLoop() {
         if (this.ping_interval) clearInterval(this.ping_interval);
-        this.ping_interval = setInterval(() => this.measureLatency(), 5000); // Every 5 seconds
+        this.ping_interval = setInterval(() => this.measureLatency(), 15000); // Every 15 seconds
     }
 
     async measureLatency() {
-        const activeApi = API_MODE === 'new' ? (this.publicApi || this.tradingApi) : this.api;
-        if (!activeApi || (activeApi.connection.readyState !== 1)) return;
-        
-        const start = Date.now();
-        try {
-            await activeApi.send({ ping: 1 });
-            const latency = Date.now() - start;
-            if (this.common_store) {
-                this.common_store.setLatency(latency);
+        if (API_MODE === 'new') {
+            const start = Date.now();
+            if (this.publicApi?.connection.readyState === 1) {
+                await this.publicApi.send({ ping: 1 }).catch(() => {});
             }
-        } catch (e) {
-            console.error('Ping error:', e);
+            if (this.tradingApi?.connection.readyState === 1) {
+                await this.tradingApi.send({ ping: 1 }).catch(() => {});
+            }
+            const latency = Date.now() - start;
+            if (this.common_store) this.common_store.setLatency(latency);
+        } else {
+            if (!this.api || (this.api.connection.readyState !== 1)) return;
+            const start = Date.now();
+            try {
+                await this.api.send({ ping: 1 });
+                const latency = Date.now() - start;
+                if (this.common_store) this.common_store.setLatency(latency);
+            } catch (e) {
+                console.error('Ping error:', e);
+            }
         }
     }
 }
