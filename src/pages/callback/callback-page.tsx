@@ -219,20 +219,22 @@ const CallbackPage = observer(() => {
     }, [common]);
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                flexDirection: 'column',
-                gap: '20px',
-                color: 'var(--text-general)',
-            }}
-        >
-            <h2>Logging in...</h2>
-            <div className='initial-loader__barspinner barspinner barspinner-light'></div>
-        </div>
+        <React.Fragment>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    flexDirection: 'column',
+                    gap: '20px',
+                    color: 'var(--text-general)',
+                }}
+            >
+                <h2>Logging in...</h2>
+                <div className='initial-loader__barspinner barspinner barspinner-light'></div>
+            </div>
+        </React.Fragment>
     );
 });
 
