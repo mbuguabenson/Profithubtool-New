@@ -197,7 +197,7 @@ const CallbackPage = observer(() => {
             }
 
             // 2. Authorize to validate and get details (Legacy only)
-            if (API_MODE === 'legacy') {
+            if (detectedMode === 'legacy') {
                 try {
                     const api = generateDerivApiInstance();
                     const activeToken = localStorage.getItem('authToken');
