@@ -158,11 +158,7 @@ class APIBase {
         if (!this.publicApi || force_create_connection) {
             const socket_url = `wss://api.derivws.com/trading/v1/options/ws/public?app_id=${getAppId()}`;
             const deriv_socket = new WebSocket(socket_url);
-            this.publicApi = {
-                connection: deriv_socket,
-                send: (data: any) => deriv_socket.send(JSON.stringify(data)),
-                disconnect: () => deriv_socket.close(),
-            } as any;
+            this.publicApi = this.wrapSocket(deriv_socket);
 
             this.publicApi?.connection.addEventListener('open', () => {
                 console.log('[API] Public WebSocket Connected');
@@ -180,11 +176,7 @@ class APIBase {
                 const otpUrl = await this.fetchOTPForAccount(accountId, accessToken);
                 const trading_socket = new WebSocket(otpUrl);
 
-                this.tradingApi = {
-                    connection: trading_socket,
-                    send: (data: any) => trading_socket.send(JSON.stringify(data)),
-                    disconnect: () => trading_socket.close(),
-                } as any;
+                this.tradingApi = this.wrapSocket(trading_socket);
 
                 this.tradingApi?.connection.addEventListener('open', () => {
                     console.log('[API] Trading WebSocket Connected (Pre-authorized)');
@@ -212,6 +204,30 @@ class APIBase {
         const data = await response.json();
         if (data.error) throw new Error(data.error_description || data.error);
         return data.url;
+    }
+
+    wrapSocket(socket: WebSocket): TApiBaseApi {
+        return {
+            connection: socket as any,
+            send: (data: any) => socket.send(JSON.stringify(data)),
+            disconnect: () => socket.close(),
+            getSelfExclusion: async () => ({}),
+            onMessage: () => ({
+                subscribe: (callback: (msg: any) => void) => {
+                    const listener = (event: MessageEvent) => {
+                        try {
+                            callback(JSON.parse(event.data));
+                        } catch (e) {
+                            console.error('[API] Failed to parse message:', e);
+                        }
+                    };
+                    socket.addEventListener('message', listener);
+                    return {
+                        unsubscribe: () => socket.removeEventListener('message', listener),
+                    };
+                },
+            }),
+        } as any;
     }
 
     getConnectionStatus() {
