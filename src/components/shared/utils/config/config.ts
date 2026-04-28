@@ -171,8 +171,10 @@ const legacyGenerateOAuthURL = () => {
     return login_url;
 };
 
-export const generateOAuthURL = async () => {
-    if (API_MODE === 'legacy') {
+export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
+    const activeMode = mode || API_MODE;
+    
+    if (activeMode === 'legacy') {
         return legacyGenerateOAuthURL();
     }
 

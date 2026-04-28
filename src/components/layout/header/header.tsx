@@ -133,31 +133,37 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
             );
         } else {
             return (
-                <div className='auth-actions'>
+                <div className='auth-actions' style={{ display: 'flex', gap: '8px' }}>
                     <Button
                         tertiary
                         onClick={async () => {
+                            localStorage.setItem('API_MODE', 'legacy');
                             clearAuthData(false);
-
                             try {
-                                // Use legacy OAuth flow (generateOAuthURL) by default for better compatibility
-                                // unless TMB is explicitly enabled and we're not on localhost
-                                const tmbEnabled = await isTmbEnabled();
-                                if (tmbEnabled && window.location.hostname !== 'localhost') {
-                                    await onRenderTMBCheck(true);
-                                } else {
-                                    window.location.assign(await generateOAuthURL());
-                                }
+                                window.location.assign(await generateOAuthURL('legacy'));
                             } catch (error) {
-                                // eslint-disable-next-line no-console
                                 console.error(error);
                             }
                         }}
                     >
-                        <Localize i18n_default_text='Log in' />
+                        <Localize i18n_default_text='Login (Legacy)' />
                     </Button>
                     <Button
                         primary
+                        onClick={async () => {
+                            localStorage.setItem('API_MODE', 'new');
+                            clearAuthData(false);
+                            try {
+                                window.location.assign(await generateOAuthURL('new'));
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        }}
+                    >
+                        <Localize i18n_default_text='Login (New)' />
+                    </Button>
+                    <Button
+                        secondary
                         onClick={() => {
                             window.open(standalone_routes.signup);
                         }}
