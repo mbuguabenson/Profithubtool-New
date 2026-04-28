@@ -178,7 +178,6 @@ export const generateOAuthURL = async () => {
 
     const lang = window.localStorage.getItem('lang') || 'EN';
     const redirect_uri = `${window.location.origin}/callback`;
-    const app_id = getAppId();
 
     // 1. Generate PKCE values
     const { code_verifier, code_challenge } = await generatePKCE();
