@@ -73,7 +73,7 @@ export const popPKCEVerifier = () => {
  */
 export const validatePKCEState = (incomingState: string) => {
     const savedState = sessionStorage.getItem('pkce_state');
-    sessionStorage.removeItem('pkce_state');
+    // Note: We don't remove it here to allow for React 18 double-render resiliency
     return incomingState === savedState;
 };
 
