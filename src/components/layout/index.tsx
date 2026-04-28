@@ -8,7 +8,12 @@ import { api_base } from '@/external/bot-skeleton';
 import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useStore } from '@/hooks/useStore';
 import useTMB from '@/hooks/useTMB';
-import { crypto_currencies_display_order, fiat_currencies_display_order, generateOAuthURL } from '../shared';
+import { 
+    crypto_currencies_display_order, 
+    fiat_currencies_display_order, 
+    generateOAuthURL,
+    API_MODE 
+} from '../shared';
 import { useDevice } from '@deriv-com/ui';
 import Footer from './footer';
 import AppHeader from './header';
@@ -150,9 +155,13 @@ const Layout = observer(() => {
             sessionStorage.setItem('query_param_currency', currency);
         }
 
+        const isNewMode = API_MODE === 'new';
+        const hasNewToken = !!localStorage.getItem('new_api_access_token');
+
         const checkOIDCEnabledWithMissingAccount = !isEndpointPage && !isCallbackPage && !clientHasCurrency;
         const shouldAuthenticate =
             (isLoggedInCookie && !isClientAccountsPopulated && !isEndpointPage && !isCallbackPage) ||
+            (isNewMode && isLoggedInCookie && !hasNewToken && !isEndpointPage && !isCallbackPage) ||
             checkOIDCEnabledWithMissingAccount;
 
         // Skip authentication when offline
