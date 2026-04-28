@@ -45,8 +45,20 @@ const CallbackPage = observer(() => {
                     return;
                 }
 
+                const incomingState = params.get('state');
+                const savedState = sessionStorage.getItem('pkce_state');
+                
+                console.log('[OAuth2] State Validation:', {
+                    incoming: incomingState,
+                    saved: savedState,
+                    match: incomingState === savedState
+                });
+
                 if (!validatePKCEState(state)) {
-                    console.error('[OAuth2] State mismatch! Possible CSRF attack.');
+                    console.error('[OAuth2] State mismatch! Possible CSRF attack.', {
+                        incoming: incomingState,
+                        saved: savedState
+                    });
                     return;
                 }
 

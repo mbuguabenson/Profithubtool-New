@@ -157,6 +157,8 @@ const Layout = observer(() => {
         };
     }, [isCurrencyValid, currency, validCurrencies, validateApiAccounts]);
 
+    const isRedirecting = useRef(false);
+
     useEffect(() => {
         // Always set the currency in session storage, even if the user is not logged in
         // This ensures the currency is available on the callback page
@@ -184,6 +186,8 @@ const Layout = observer(() => {
         // Create an async IIFE to handle authentication
         (async () => {
             try {
+                if (isRedirecting.current) return;
+
                 // First, explicitly wait for TMB status to be determined
                 // This ensures we have the correct TMB status before proceeding
                 const tmbEnabled = await isTmbEnabled();
@@ -192,6 +196,7 @@ const Layout = observer(() => {
                 if (tmbEnabled) {
                     await onRenderTMBCheck();
                 } else if (shouldAuthenticate) {
+                    isRedirecting.current = true;
                     window.location.assign(await generateOAuthURL());
                 }
             } catch (err) {
