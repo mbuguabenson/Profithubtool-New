@@ -217,6 +217,23 @@ class APIBase {
     }
 
     wrapSocket(socket: WebSocket): TApiBaseApi {
+        const response_promises = new Map<number | string, { resolve: (val: any) => void; reject: (err: any) => void }>();
+        let req_id_counter = 0;
+
+        socket.addEventListener('message', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                const req_id = data.req_id;
+                if (req_id && response_promises.has(req_id)) {
+                    const { resolve } = response_promises.get(req_id)!;
+                    response_promises.delete(req_id);
+                    resolve(data);
+                }
+            } catch (e) {
+                // Ignore parse errors here, handled in onMessage
+            }
+        });
+
         return {
             connection: socket as any,
             send: async (data: any) => {
@@ -224,9 +241,23 @@ class APIBase {
                     await new Promise(resolve => socket.addEventListener('open', resolve, { once: true }));
                 }
                 if (socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify(data));
+                    const req_id = data.req_id || ++req_id_counter;
+                    const request_data = { ...data, req_id };
+                    
+                    return new Promise((resolve, reject) => {
+                        response_promises.set(req_id, { resolve, reject });
+                        socket.send(JSON.stringify(request_data));
+                        
+                        // Timeout for safety
+                        setTimeout(() => {
+                            if (response_promises.has(req_id)) {
+                                response_promises.delete(req_id);
+                                reject(new Error(`[API] Request timeout: ${req_id}`));
+                            }
+                        }, 30000);
+                    });
                 } else {
-                    console.error('[API] Cannot send message: Socket is not open', data);
+                    throw new Error('[API] Cannot send message: Socket is not open');
                 }
             },
             disconnect: () => socket.close(),
