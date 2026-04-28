@@ -167,22 +167,25 @@ class APIBase {
         }
 
         // 2. Initialize Trading WS (If logged in)
-        const accessToken = localStorage.getItem('new_api_access_token');
-        let accountId = localStorage.getItem('new_api_account_id');
+        const storedToken = localStorage.getItem('new_api_access_token');
+        let storedId = localStorage.getItem('new_api_account_id');
 
         // Fallback for account ID
-        if (!accountId && localStorage.getItem('new_api_accounts_list')) {
+        if (!storedId && localStorage.getItem('new_api_accounts_list')) {
             const accounts = JSON.parse(localStorage.getItem('new_api_accounts_list') || '[]');
             if (accounts.length > 0) {
-                accountId = accounts[0].account_id || '';
-                localStorage.setItem('new_api_account_id', accountId);
+                storedId = accounts[0].account_id;
+                if (storedId) localStorage.setItem('new_api_account_id', storedId);
             }
         }
 
-        if (accessToken && accountId) {
+        if (storedToken && storedId) {
+            const token: string = storedToken;
+            const accountId: string = storedId;
+
             setIsAuthorizing(true);
             try {
-                const otpUrl = await this.fetchOTPForAccount(accountId as string, accessToken);
+                const otpUrl = await this.fetchOTPForAccount(accountId, token);
                 if (!otpUrl) throw new Error('Failed to obtain OTP URL');
                 
                 const trading_socket = new WebSocket(otpUrl);
