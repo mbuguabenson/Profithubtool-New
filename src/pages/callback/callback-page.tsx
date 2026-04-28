@@ -46,6 +46,13 @@ const CallbackPage = observer(() => {
                 }
 
                 try {
+                    const redirect_uri = `${window.location.origin}/callback`;
+                    console.log('[OAuth2] Exchange Config:', {
+                        client_id: DERIV_OAUTH_CLIENT_ID,
+                        redirect_uri,
+                        grant_type: 'authorization_code'
+                    });
+
                     console.log('[OAuth2] Exchanging code for token...');
                     const response = await fetch(DERIV_NEW_TOKEN_URL, {
                         method: 'POST',
@@ -54,15 +61,22 @@ const CallbackPage = observer(() => {
                             grant_type: 'authorization_code',
                             code,
                             client_id: DERIV_OAUTH_CLIENT_ID,
-                            redirect_uri: `${window.location.origin}/callback`,
+                            redirect_uri,
                             code_verifier: verifier,
                         }),
                     });
 
-                    const data = await response.json();
-                    if (data.error) {
-                        throw new Error(data.error_description || data.error);
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('[OAuth2] Token Exchange Error Response:', {
+                            status: response.status,
+                            statusText: response.statusText,
+                            data: errorData,
+                        });
+                        throw new Error(errorData.error_description || errorData.error || `HTTP ${response.status}`);
                     }
+
+                    const data = await response.json();
 
                     // 1. Store tokens
                     localStorage.setItem('new_api_access_token', data.access_token);
