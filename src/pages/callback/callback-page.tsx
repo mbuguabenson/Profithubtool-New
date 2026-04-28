@@ -1,9 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
-import { DERIV_NEW_TOKEN_URL, getAppId, DERIV_OAUTH_CLIENT_ID } from '@/components/shared/utils/config/config';
-import { popPKCEVerifier, validatePKCEState } from '@/utils/pkce';
-
+import { getAppId } from '@/components/shared/utils/config/config';
 import { clearAuthData } from '@/utils/auth-utils';
 import { useStore } from '@/hooks/useStore';
 import { observer } from 'mobx-react-lite';

@@ -1,5 +1,4 @@
 import { isStaging } from '../url/helpers';
-import { generatePKCE, generateState, storePKCEState, getStoredPKCE, getStoredState, sha256, base64urlencode } from '@/utils/pkce';
 
 export const DERIV_NEW_AUTH_URL = 'https://auth.deriv.com/oauth2/auth';
 export const DERIV_NEW_TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
@@ -157,7 +156,7 @@ const legacyGenerateOAuthURL = () => {
     return login_url;
 };
 
-export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
+export const generateOAuthURL = async () => {
     // Force legacy regardless of requested mode
     return legacyGenerateOAuthURL();
 };

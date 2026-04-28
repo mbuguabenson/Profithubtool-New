@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import PWAInstallButton from '@/components/pwa-install-button';
 import { standalone_routes } from '@/components/shared';
-import { generateOAuthURL, API_MODE } from '@/components/shared/utils/config/config';
+import { generateOAuthURL } from '@/components/shared/utils/config/config';
 import Button from '@/components/shared_ui/button';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useOauth2 } from '@/hooks/auth/useOauth2';
@@ -45,8 +45,6 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
     const { hubEnabledCountryList } = useFirebaseCountriesConfig();
     const { onRenderTMBCheck, isTmbEnabled } = useTMB();
     const is_tmb_enabled = isTmbEnabled() || window.is_tmb_enabled === true;
-    
-    const [showConnectOptions, setShowConnectOptions] = React.useState(false);
 
     const renderAccountSection = useCallback(() => {
         // Show loader during authentication processes
@@ -149,7 +147,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
                     >
                         <Localize i18n_default_text='Connect' />
                     </Button>
-                    {!isDesktop && !showConnectOptions && (
+                    {!isDesktop && (
                         <Button
                             secondary
                             onClick={() => {
@@ -159,7 +157,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
                             <Localize i18n_default_text='Sign up' />
                         </Button>
                     )}
-                    {isDesktop && !showConnectOptions && (
+                    {isDesktop && (
                         <Button
                             secondary
                             onClick={() => {
@@ -188,7 +186,6 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         is_tmb_enabled,
         hubEnabledCountryList,
         isTmbEnabled,
-        showConnectOptions,
     ]);
 
     if (client?.should_hide_header) return null;
