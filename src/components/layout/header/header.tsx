@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import PWAInstallButton from '@/components/pwa-install-button';
@@ -103,7 +103,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
                             const is_hub_enabled_country = hubEnabledCountryList.includes(client?.residence || '');
 
                             if (has_wallet && is_hub_enabled_country) {
-                                urlParams = new URL(standalone_routes.account_settings);
+                                redirect_url = new URL(standalone_routes.account_settings);
                             }
                             // Check if the account is a demo account
                             // Use the URL parameter to determine if it's a demo account, as this will update when the account changes

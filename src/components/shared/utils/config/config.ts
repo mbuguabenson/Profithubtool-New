@@ -152,18 +152,6 @@ export const getDebugServiceWorker = () => {
 };
 
 const legacyGenerateOAuthURL = () => {
-    const hostname = window.location.hostname;
-    const lang = window.localStorage.getItem('lang') || 'EN';
-    const redirect_uri = encodeURIComponent(`${window.location.origin}/callback`);
-
-    let oauth_url = 'https://oauth.deriv.com/oauth2/authorize';
-
-    if (hostname.includes('.deriv.me')) {
-        oauth_url = 'https://oauth.deriv.me/oauth2/authorize';
-    } else if (hostname.includes('.deriv.be')) {
-        oauth_url = 'https://oauth.deriv.be/oauth2/authorize';
-    }
-
     const app_id = getAppId();
     const login_url = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&brand=deriv&redirect=home&state=`;
  
