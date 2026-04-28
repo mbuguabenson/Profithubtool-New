@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
 import { API_MODE, DERIV_NEW_TOKEN_URL, getAppId, DERIV_OAUTH_CLIENT_ID } from '@/components/shared/utils/config/config';
