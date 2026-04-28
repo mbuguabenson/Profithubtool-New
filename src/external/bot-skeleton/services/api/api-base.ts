@@ -209,7 +209,16 @@ class APIBase {
     wrapSocket(socket: WebSocket): TApiBaseApi {
         return {
             connection: socket as any,
-            send: (data: any) => socket.send(JSON.stringify(data)),
+            send: async (data: any) => {
+                if (socket.readyState === WebSocket.CONNECTING) {
+                    await new Promise(resolve => socket.addEventListener('open', resolve, { once: true }));
+                }
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify(data));
+                } else {
+                    console.error('[API] Cannot send message: Socket is not open', data);
+                }
+            },
             disconnect: () => socket.close(),
             getSelfExclusion: async () => ({}),
             onMessage: () => ({
