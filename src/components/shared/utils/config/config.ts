@@ -1,5 +1,5 @@
 import { isStaging } from '../url/helpers';
-import { generatePKCE, generateState, storePKCEState } from '@/utils/pkce';
+import { generatePKCE, generateState, storePKCEState, getStoredPKCE, getStoredState, sha256, base64urlencode } from '@/utils/pkce';
 
 export const DERIV_NEW_AUTH_URL = 'https://auth.deriv.com/oauth2/auth';
 export const DERIV_NEW_TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
@@ -169,12 +169,28 @@ export const generateOAuthURL = async (mode?: 'legacy' | 'new') => {
     const lang = window.localStorage.getItem('lang') || 'EN';
     const redirect_uri = 'https://profithubtool.vercel.app/callback';
 
-    // 1. Generate PKCE values
-    const { code_verifier, code_challenge } = await generatePKCE();
-    const state = generateState();
+    // 1. Check for existing PKCE values to prevent state-overwriting during re-renders
+    let code_verifier: string;
+    let code_challenge: string;
+    let state: string;
 
-    // 2. Store verifier and state for the callback phase
-    storePKCEState(code_verifier, state);
+    const existingPKCE = getStoredPKCE();
+    const existingState = getStoredState();
+
+    if (existingPKCE?.code_verifier && existingState) {
+        console.log('[Config] Reusing existing PKCE state');
+        code_verifier = existingPKCE.code_verifier;
+        state = existingState;
+        // Regenerate challenge from existing verifier
+        const challenge_buffer = await sha256(code_verifier);
+        code_challenge = base64urlencode(challenge_buffer);
+    } else {
+        const pkce = await generatePKCE();
+        code_verifier = pkce.code_verifier;
+        code_challenge = pkce.code_challenge;
+        state = generateState();
+        storePKCEState(code_verifier, state);
+    }
 
     // 3. Build the new Authorization Code + PKCE URL
     const params = new URLSearchParams({

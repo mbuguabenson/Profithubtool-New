@@ -18,13 +18,13 @@ const generateRandomString = (length: number): string => {
 /**
  * Hashes a string using SHA-256 and returns a Base64URL encoded string
  */
-const sha256 = async (plain: string): Promise<ArrayBuffer> => {
+export const sha256 = async (plain: string): Promise<ArrayBuffer> => {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
     return window.crypto.subtle.digest('SHA-256', data);
 };
 
-const base64urlencode = (a: ArrayBuffer): string => {
+export const base64urlencode = (a: ArrayBuffer): string => {
     let str = '';
     const bytes = new Uint8Array(a);
     const len = bytes.byteLength;
@@ -78,3 +78,12 @@ export const validatePKCEState = (incomingState: string) => {
 };
 
 export const generateState = () => generateRandomString(32);
+
+export const getStoredPKCE = () => {
+    const verifier = sessionStorage.getItem('pkce_code_verifier');
+    return verifier ? { code_verifier: verifier } : null;
+};
+
+export const getStoredState = () => {
+    return sessionStorage.getItem('pkce_state');
+};
